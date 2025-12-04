@@ -20,6 +20,9 @@ app.get("/health", (req, res) => {
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
+app.get("/api/contact", (req, res) => {
+  res.send("Contact POST route is live. Use POST request.");
+});
 
 
 // Ping endpoint
