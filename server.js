@@ -16,6 +16,11 @@ app.use(bodyParser.json());
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date() });
 });
+// Test route
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
 
 // Ping endpoint
 app.get("/ping", (req, res) => {
