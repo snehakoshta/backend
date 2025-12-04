@@ -43,3 +43,7 @@ app.post("/api/contact", async (req, res) => {
 app.listen(PORT, () => {
   console.log("Server running on port 5000");
 });
+app.get("/", (req, res) => {
+  res.send("Backend is successfully running 🚀");
+});
+
