@@ -8,52 +8,70 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// =======================
 // Middleware
+// =======================
 app.use(cors());
-app.use(express.json()); // body-parser is included in express
+app.use(express.json());
 
-// Routes
+// =======================
+// Health Check Route
+// =======================
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
+// =======================
+// Contact API
+// =======================
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // Validate input
+    // ✅ Validation
     if (!name || !email || !message) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Create transporter
+    // ✅ Check ENV variables
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error("❌ EMAIL_USER or EMAIL_PASS is missing");
+      return res.status(500).json({ error: "Email service not configured" });
+    }
+
+    // ✅ Stable Gmail SMTP Transporter
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for 587
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // Gmail App Password
       },
     });
 
-    // Prepare mail options
+    // ✅ Mail Options
     const mailOptions = {
-      from: process.env.EMAIL_USER, // Use your own email to avoid Gmail restrictions
-      replyTo: email, // So you can reply to the user
+      from: process.env.EMAIL_USER,
+      replyTo: email,
       to: process.env.EMAIL_USER,
       subject: `New message from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
     };
 
-    // Send email
+    // ✅ Send Mail
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({ message: "Message sent successfully" });
   } catch (err) {
-    console.error("Error sending email:", err.message);
+    console.error("❌ Error sending email:", err.message);
     res.status(500).json({ error: "Failed to send message" });
   }
 });
 
-// Health check
-app.get("/ping", (req, res) => res.send("pong"));
-
-// Start server
+// =======================
+// Start Server
+// =======================
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
